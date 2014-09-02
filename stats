@@ -1,0 +1,269 @@
+#!/usr/bin/perl
+
+########################################
+# stats: calculate all the standard features of a list of numbers.
+# This includes the maximum, mean, median, minimum, standard
+# deviation, count, and sum.  
+#
+# Caveat: code is designed for maintainability, not speed or memory
+# conservation.
+#
+# Changelog:
+#
+# Sept 3: fix normalization of histogram Y values per Tania bug
+# report, draw lines for X and Y axes.  fix median to operate on
+# unique values only, not all values.
+# August 7: fix stddev error reported by Jay Sulzberger.
+# July 6: In graph, suppress
+# items with 0 counts, modify padding so that graph is aligned with
+# calculation results.
+# June 22: add graph generator.  move loose code to subroutines.
+# June 19: fix min/max/median for float inputs.  Added "item count" to
+# outputs.
+# May 14: remove mode, since it was busted, fixing it would take
+# longer than I want to spend, and mode of any one number instead of a
+# range of numbers is rather useless.  fix median, which was very broken.
+# May 13, 2003: created changelog
+#
+# Permanent home of this code on the web:
+# http://gonze.com/stats/
+#
+# Contact:
+# Lucas Gonze <lucas@gonze.com>
+#
+########################################
+
+use strict;
+use POSIX;
+
+# globals
+my @numbers;
+my $cnt;
+
+# ugly workaround for emacs indentation bug -- cperl-mode can't handle a
+# dollar sign at the end of a regex, so put the character in a var and
+# reference the var .
+my $dollar = "\$";
+
+##########
+# input
+
+sub parse_input {
+
+    while(<STDIN>){
+	chomp();
+	
+	# trim leading and trailing whitespace
+	s/(^\s*)(.*)(\s*$dollar)/$2/g;
+	
+	# trim trailing CR caused by windows-unix conversion 
+	s/(.*)(\r$)/$1/g;
+	
+	# skip comments and blanks
+	if ( /(\#)(.*)/ || /^$/ ) {
+	    next;
+	}
+	
+	push(@numbers, $_ + 0);
+    }
+    
+# median and min/max code need the array to be sorted
+    my @sorted = sort {$a <=> $b} (@numbers);
+    @numbers = @sorted;
+
+    $cnt = $#numbers+1;
+    if ( $cnt < 1 ) {
+	print "No input\n";
+	exit(1);
+    }
+}
+
+##########
+# average
+
+sub get_sum_and_average {
+    my $sum = 0;
+    for my $number (@numbers) {
+	$sum += $number;
+    }
+    return( $sum, $sum/$cnt );
+}
+
+##########
+# median
+
+sub get_nth_unique_element {
+  my ($n) = @_;
+  my $pos = 0;
+  my $last = undef;
+  foreach(@numbers){
+    if( $_ != $last ){
+      if( $pos == $n ){
+	return($_);
+      }
+      $pos++;
+    }
+    $last = $_;
+  }
+  return(undef);
+}
+
+sub get_median(){
+
+  # count unique elements
+  my $last = undef;
+  my $qcnt=0;
+  foreach(@numbers){
+    if( $_ != $last ){
+      $qcnt++;
+    }
+    $last = $_;
+  }
+
+  my $isOdd = $qcnt % 2;
+  if( $isOdd ){
+    my $tgt = POSIX::floor($qcnt/2);
+    return(get_nth_unique_element($tgt));
+  } else {
+    my $tgt = POSIX::floor($qcnt/2)-1;
+    return((get_nth_unique_element($tgt) + get_nth_unique_element($tgt+1)) / 2);
+  }
+  
+}
+
+##########
+# standard deviation
+
+sub get_stddev {
+  my( $average ) = @_;
+  my $stddev = 0;
+  if ($cnt < 2) {                 # Only 1 number?
+    $stddev = "UNDEFINED";
+  } else {
+    for my $number (@numbers) { 
+      $stddev = $stddev + ($number - $average) ** 2;
+    }
+    $stddev = sqrt($stddev / ($cnt - 1));
+  }
+  return($stddev);
+}
+
+##########
+# min and max
+
+sub get_minmax {
+  my $min = $numbers[0];
+  my $max = $numbers[$#numbers];
+  return($min,$max);
+}
+
+##########
+# histogram.  items are on the X axis, counts are on the Y axis.
+
+sub lesser_of {
+    my($a, $b) = @_;
+    if( $a < $b ){
+	return($a);
+    } else {
+	return($b);
+    }
+}
+
+sub gen_histogram {
+  my ($max,$sum) = @_;
+  my $ySize = 4;
+  my $xSize = 60;
+  my @arr;
+  my $ret = "";
+
+  # set up position of items on X axis
+  my $sizeOfDenormXAxis = $max+1;
+  my $sizeOfNormXAxis = lesser_of($xSize,$sizeOfDenormXAxis);
+  my $xNormalizationFactor = $sizeOfNormXAxis/$sizeOfDenormXAxis;
+
+  # calculate Y values as the count of each item with a given X value
+  foreach( @numbers ){
+    # have to squash X value to fit in the graph
+    my $normX = $_ * $xNormalizationFactor;
+    $arr[$normX]++;
+  }
+ 
+  # set up position of items on Y axis:
+  # 1) find largest Y value, so that we can figure out how much to squash Y values
+  my $sizeOfDenormYAxis = 0;
+  foreach( @arr ){
+    if( $_ > $sizeOfDenormYAxis ){
+      $sizeOfDenormYAxis = $_;
+    }
+  }
+  # ...but don't squash Y values if none exceed the maximum
+  my $sizeOfNormYAxis = lesser_of($ySize,$sizeOfDenormYAxis);
+  my $yNormalizationFactor = $sizeOfNormYAxis/$sizeOfDenormYAxis;
+
+  # 2) now squash Y values so that they fit within the graph
+  for( my $i=0; $i<$#arr+1; $i++){
+    $arr[$i] = $arr[$i] * $yNormalizationFactor;
+  }
+
+  # draw the graph
+  my $padding = "                      |"; 
+  my $haveANonBlankLine = 0;
+  for( my $i=$sizeOfNormYAxis+1; $i>0; $i-- ){
+    my $str = $padding;
+    for( my $j=0; $j<$#arr+1; $j++){
+      if( $i+1 > $arr[$j] && $i <= $arr[$j] && $arr[$j] > 0){
+	$str .= ".";
+	$haveANonBlankLine = 1;
+      } else {
+	$str .= " ";
+      }
+    }
+    if( $haveANonBlankLine ){
+      $ret .= "$str\n";
+    }
+  }
+
+  # add a line of dashes below the graph
+  if( $haveANonBlankLine ){
+    $ret .= $padding;
+    for( my $i=0; $i<$sizeOfNormXAxis; $i++ ){
+      $ret .= "_";
+    }
+    $ret .= "\n";
+  }
+
+  return($ret);
+}
+
+##########
+# output
+
+sub draw_output {
+  my( $max, $median, $min, $average, $stddev, $sum, $cnt, $histogram )=@_;
+print <<EOF;
+             maximum: $max
+              median: $median
+             minimum: $min
+
+             average: $average
+  standard deviation: $stddev
+                 sum: $sum
+          item count: $cnt
+
+           histogram:
+$histogram
+EOF
+}
+
+###########
+# main
+
+parse_input();
+
+my ($sum, $average) = get_sum_and_average();
+my $median = get_median();
+my $stddev = get_stddev($average);
+my ($min, $max) = get_minmax();
+my $histogram = gen_histogram($max+1, $sum);
+
+draw_output( $max, $median, $min, $average, $stddev, $sum, $cnt, $histogram);
