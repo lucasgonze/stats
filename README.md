@@ -71,5 +71,8 @@ For this particular set of inputs the graph shows that element counts rise from 
          #!/usr/local/bin/perl
    or wherever your perl is installed.
 
-# Contact
+# Author
    <a href="mailto:lucas@gonze.com">lucas@gonze.com</a>
+
+   This program is hereby dedicated to the public domain.
+   
