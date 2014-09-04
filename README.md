@@ -73,6 +73,4 @@ For this particular set of inputs the graph shows that element counts rise from 
 
 # Author
    <a href="mailto:lucas@gonze.com">lucas@gonze.com</a>
-
-   This program is hereby dedicated to the public domain.
    
