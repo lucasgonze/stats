@@ -1,7 +1,0 @@
-XBitHack On 
-
-DirectoryIndex index.html
-
-#RewriteEngine on
-#RewriteCond   / /weblog/index.cgi
-
