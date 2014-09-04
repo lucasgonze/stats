@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Stats : Quick metrics for any old data. A console app.">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Stats</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/lucasgonze/stats">View on GitHub</a>
+
+          <h1 id="project_title">Stats</h1>
+          <h2 id="project_tagline">Quick metrics for any old data. A console app.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/lucasgonze/stats/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/lucasgonze/stats/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p><em>stats</em> is a Unix console utility which gives you a quick analysis of a set of numbers.  It is not only as simple as possible, it is even simpler: it reads data from standard input -- only -- and there are no
+options or command line arguments.</p>
+
+<h2>
+<a name="input" class="anchor" href="#input"><span class="octicon octicon-link"></span></a>Input</h2>
+
+<p>A list of numbers separated by carriage returns, passed to the program by stdin.</p>
+
+<p>Lines beginning with '#' are considered comments and are skipped.</p>
+
+<h2>
+<a name="output" class="anchor" href="#output"><span class="octicon octicon-link"></span></a>Output</h2>
+
+<ul>
+<li>maximum (the largest item)</li>
+<li>mean</li>
+<li>median</li>
+<li>minimum (the smallest item)</li>
+<li>standard deviation</li>
+<li>item count</li>
+<li>sum (of all items)</li>
+<li>a <a href="https://en.wikipedia.org/wiki/Histogram">histogram</a>
+</li>
+</ul><h2>
+<a name="example" class="anchor" href="#example"><span class="octicon octicon-link"></span></a>Example</h2>
+
+<p>If there is a file named "numbers.dat", for example, and each line of the file is a number, you would invoke stats as follows:</p>
+
+<pre><code>  cat numbers.dat | stats
+</code></pre>
+
+<p>If the file "numbers.dat" contains the following items:</p>
+
+<pre><code>  1
+  2
+  2
+  3
+</code></pre>
+
+<p>Usage would look like this:</p>
+
+<pre><code>      bash-2.05b$ cat numbers.dat | stats
+             maximum: 3
+              median: 2
+             minimum: 1
+
+             average: 2
+  standard deviation: 0.816496580927726
+                 sum: 8
+          item count: 4
+
+           histogram:
+                      |  .
+                      | . .
+                      |_____
+</code></pre>
+
+<h2>
+<a name="graph" class="anchor" href="#graph"><span class="octicon octicon-link"></span></a>Graph</h2>
+
+<p>Explanation of the graph:</p>
+
+<ul>
+<li>X axis represents a unique value</li>
+<li>Y axis represents how many times the element occurred</li>
+</ul><p>In other words, it's a histogram.</p>
+
+<p>For this particular set of inputs the graph shows that element counts rise from 0 to 2, then fall.</p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<ul>
+<li>Download the latest version.</li>
+<li>Make it executable by doing "chmod 755 stats".</li>
+<li>Copy it to a directory in your path, e.g. /usr/local/bin.</li>
+<li>If perl is not installed in /usr/bin/perl on your system, you will need to change the first line of the the script from
+     #!/usr/bin/perl
+ to
+     #!/usr/local/bin/perl
+or wherever your perl is installed.</li>
+</ul><h1>
+<a name="author" class="anchor" href="#author"><span class="octicon octicon-link"></span></a>Author</h1>
+
+<p><a href="mailto:lucas@gonze.com"></a><a href="mailto:lucas@gonze.com">lucas@gonze.com</a></p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Stats maintained by <a href="https://github.com/lucasgonze">lucasgonze</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
